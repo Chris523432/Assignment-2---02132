@@ -11,5 +11,14 @@ class ProgramCounter extends Module {
   })
 
   //Implement this module here (respect the provided interface, since it used by the tester)
+  val programCounterNext = RegInit(0.U(16.W))
 
+  when (io.run && !io.stop) {
+    when(!io.jump) {
+      programCounterNext := programCounterNext + 1.U
+    } .otherwise {
+      programCounterNext := io.programCounterJump
+    }
+  }
+  io.programCounter := programCounterNext
 }

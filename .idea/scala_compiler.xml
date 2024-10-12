@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="sbt 1" modules="codea2_6601" />
-    <profile name="sbt 2" modules="codea2">
+    <profile name="sbt 1" modules="assignment-2-02132_2702,codea2_6601" />
+    <profile name="sbt 2" modules="assignment-2-02132,codea2">
       <parameters>
         <parameter value="-Xsource:2.11" />
       </parameters>
