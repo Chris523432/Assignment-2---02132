@@ -25,7 +25,7 @@ class CPUTop extends Module {
   val programMemory = Module(new ProgramMemory())
   val registerFile = Module(new RegisterFile())
   val controlUnit = Module(new ControlUnit())
-  val alu = Module(new ALU())
+  val alu = Module(new Alu())
 
   //Connecting the modules
   //programCounter.io.run := io.run

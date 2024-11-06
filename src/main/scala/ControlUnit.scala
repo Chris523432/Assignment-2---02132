@@ -7,7 +7,7 @@ class ControlUnit extends Module {
     val func = Input(UInt(6.W))
 
     val aluSel = Output(UInt(4.W))
-    val regWrite = Output(Bool())
+    val regWrite = Output(Bool()) //writeEnble
     val memRead = Output(Bool())
     val memWrite = Output(Bool())
     val aluSrc = Output(Bool())
@@ -34,19 +34,47 @@ class ControlUnit extends Module {
         }
       }
     }
-    io.aluSel := io.opcode - 2.U
-    is(1.U | 2.U | 3.U) { //ADDI SUBI LI
+    is(1.U) { //ADDI
+      io.aluSel := 3.U
+      io.aluSrc := true.B
+      io.regWrite := true.B
+    }
+    is(2.U) { //SUBI
+      io.aluSel := 4.U
+      io.aluSrc := true.B
+      io.regWrite := true.B
+    }
+    is(3.U) { //LI
+      io.aluSel := 5.U
       io.aluSrc := true.B
       io.regWrite := true.B
     }
     is(4.U) { //LD
+      io.aluSel := 6.U
       io.regWrite := true.B
       io.memRead := true.B
     }
     is(5.U) { //SD
+      io.aluSel := 7.U
       io.memWrite := true.B
     }
-    is(6.U | 7.U | 8.U | 9.U) { //JEQ JGT JLT
+    is(6.U) { //JEQ
+      io.aluSel := 8.U
+      io.aluSrc := true.B
+      io.branch := true.B
+    }
+    is(7.U) { //JLT
+      io.aluSel := 9.U
+      io.aluSrc := true.B
+      io.branch := true.B
+    }
+    is(8.U) { //JGT
+      io.aluSel := 10.U
+      io.aluSrc := true.B
+      io.branch := true.B
+    }
+    is{9.U} { //JR
+      io.aluSel := 11.U
       io.aluSrc := true.B
       io.branch := true.B
     }

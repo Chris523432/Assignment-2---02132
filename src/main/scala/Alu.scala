@@ -24,5 +24,6 @@ class Alu extends Module {
     is(8.U) {io.comparisonResult := io.a === io.b}
     is(9.U) {io.comparisonResult := io.a > io.b}
     is(10.U) {io.comparisonResult := io.a < io.b}
+    is(11.U) {io.comparisonResult := true.B}
   }
 }
