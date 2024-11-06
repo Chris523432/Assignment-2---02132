@@ -7,7 +7,7 @@ class ControlUnit extends Module {
     val func = Input(UInt(6.W))
 
     val aluSel = Output(UInt(4.W))
-    val regWrite = Output(Bool()) //writeEnble
+    val writeEnable = Output(Bool())
     val memRead = Output(Bool())
     val memWrite = Output(Bool())
     val aluSrc = Output(Bool())
@@ -15,7 +15,7 @@ class ControlUnit extends Module {
   })
 
   io.aluSel := 0.U
-  io.regWrite := false.B
+  io.writeEnable := false.B
   io.memRead := false.B
   io.memWrite := false.B
   io.aluSrc := false.B
@@ -26,32 +26,32 @@ class ControlUnit extends Module {
       switch(io.func) {
         is(1.U) { //ADD
           io.aluSel := 1.U
-          io.regWrite := true.B
+          io.writeEnable := true.B
         }
         is(2.U) { //MULT
           io.aluSel := 2.U
-          io.regWrite := true.B
+          io.writeEnable := true.B
         }
       }
     }
     is(1.U) { //ADDI
       io.aluSel := 3.U
       io.aluSrc := true.B
-      io.regWrite := true.B
+      io.writeEnable := true.B
     }
     is(2.U) { //SUBI
       io.aluSel := 4.U
       io.aluSrc := true.B
-      io.regWrite := true.B
+      io.writeEnable := true.B
     }
     is(3.U) { //LI
       io.aluSel := 5.U
       io.aluSrc := true.B
-      io.regWrite := true.B
+      io.writeEnable := true.B
     }
     is(4.U) { //LD
       io.aluSel := 6.U
-      io.regWrite := true.B
+      io.writeEnable := true.B
       io.memRead := true.B
     }
     is(5.U) { //SD

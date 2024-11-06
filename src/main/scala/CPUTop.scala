@@ -34,16 +34,28 @@ class CPUTop extends Module {
 
   ////////////////////////////////////////////
   //Continue here with your connections
+  registerFile.io.writeEnable := controlUnit.io.writeEnable
+  val immediate = programMemory.io.instructionRead(15, 0)
+  programCounter.io.programCounterJump :=  immediate
+
   val opcode = programMemory.io.instructionRead(31, 25)
   controlUnit.io.opcode := opcode
   if (opcode != 9.U) {
     registerFile.io.writeSel := programMemory.io.instructionRead(24, 20)
-    registerFile.io.a := programMemory.io.instructionRead(19, 15)
+    registerFile.io.aSel := programMemory.io.instructionRead(19, 15)
     if (opcode == 0.U) {
+      registerFile.io.bSel := programMemory.io.instructionRead(14, 10)
       controlUnit.io.func := programMemory.io.instructionRead(5, 0)
-      registerFile.io.b := programMemory.io.instructionRead(14, 10)
     }
   }
+
+  when (controlUnit.io.aluSrc) {
+    alu.io.b := registerFile.io.b
+  } .otherwise {
+    alu.io.b := immediate >> 16
+  }
+
+  alu.io.sel := controlUnit.io.aluSel
 
   ////////////////////////////////////////////
 
