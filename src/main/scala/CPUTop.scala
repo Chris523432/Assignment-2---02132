@@ -28,11 +28,23 @@ class CPUTop extends Module {
   val alu = Module(new Alu())
 
   //Connecting the modules
-  //programCounter.io.run := io.run
-  //programMemory.io.address := programCounter.io.programCounter
+  io.done := false.B
+  programCounter.io.run := io.run
+  programMemory.io.address := programCounter.io.programCounter
 
   ////////////////////////////////////////////
   //Continue here with your connections
+  val opcode = programMemory.io.instructionRead(31, 25)
+  controlUnit.io.opcode := opcode
+  if (opcode != 9.U) {
+    registerFile.io.writeSel := programMemory.io.instructionRead(24, 20)
+    registerFile.io.a := programMemory.io.instructionRead(19, 15)
+    if (opcode == 0.U) {
+      controlUnit.io.func := programMemory.io.instructionRead(5, 0)
+      registerFile.io.b := programMemory.io.instructionRead(14, 10)
+    }
+  }
+
   ////////////////////////////////////////////
 
   //This signals are used by the tester for loading the program to the program memory, do not touch

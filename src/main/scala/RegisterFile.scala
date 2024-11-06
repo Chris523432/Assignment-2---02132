@@ -6,10 +6,10 @@ class RegisterFile extends Module {
     //Define the module interface here (inputs/outputs)
 
     // Inputs
-    val aSel = Input(UInt(4.W))
-    val bSel = Input(UInt(4.W))
+    val aSel = Input(UInt(5.W))
+    val bSel = Input(UInt(5.W))
     val writeData = Input(UInt(32.W))
-    val writeSel = Input(UInt(4.W))
+    val writeSel = Input(UInt(5.W))
     val writeEnable = Input(Bool())
 
     //Outputs
