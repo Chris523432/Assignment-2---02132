@@ -76,7 +76,7 @@ class ControlUnit extends Module {
       io.aluSrc := true.B
       io.branch := true.B
     }
-    is{9.U} { //JR
+    is(9.U) { //JR
       io.aluSel := 11.U
       io.aluSrc := true.B
       io.branch := true.B

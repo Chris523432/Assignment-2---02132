@@ -5,6 +5,7 @@ class CPUTop extends Module {
   val io = IO(new Bundle {
     val done = Output(Bool ())
     val run = Input(Bool ())
+    val stop = Input(Bool ())
     //This signals are used by the tester for loading and dumping the memory content, do not touch
     val testerDataMemEnable = Input(Bool ())
     val testerDataMemAddress = Input(UInt (16.W))
@@ -25,47 +26,31 @@ class CPUTop extends Module {
   val programMemory = Module(new ProgramMemory())
   val registerFile = Module(new RegisterFile())
   val controlUnit = Module(new ControlUnit())
-  val alu = Module(new Alu())
+  val alu = Module(new ALU())
 
   //Connecting the modules
   io.done := false.B
   programCounter.io.run := io.run
+  programCounter.io.stop := io.stop
   programMemory.io.address := programCounter.io.programCounter
 
   ////////////////////////////////////////////
-  //Continue here with your connections
-  val opcode = programMemory.io.instructionRead(31, 26)
-  controlUnit.io.opcode := opcode
-  // Everything based on signals from control unit
-  when (controlUnit.io.writeEnable && !controlUnit.io.memRead) { //ADD, MULT, ADDI, SUBI, LI
-    registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
-    registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
-    alu.io.a := registerFile.io.a
-    when (controlUnit.io.aluSrc) { //ADDI SUBI, LI - MUX for ALU input b
-      alu.io.b := programMemory.io.instructionRead(15, 0).pad(32)
-    } .otherwise { //ADD, MULT
-      controlUnit.io.func := programMemory.io.instructionRead(5, 0)
-      registerFile.io.bSel := programMemory.io.instructionRead(15, 11)
-      alu.io.b := registerFile.io.b
-    } // MUX end for ALU input b
-    registerFile.io.writeData := alu.io.result //Write data from ALU into register
-  } .elsewhen(controlUnit.io.memtoReg) { //LD - MUX'ish for ALU and MEM
-    registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
-    registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
-    alu.io.a := registerFile.io.a
-    dataMemory.io.address := alu.io.result(31,16)
-    registerFile.io.writeData := dataMemory.io.dataRead
-  } .elsewhen(controlUnit.io.memWrite) { //SD - Take output a/result from ALU as address
-    registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
-    alu.io.a := registerFile.io.a
-    dataMemory.io.address := alu.io.result(31,16)
-    registerFile.io.bSel := programMemory.io.instructionRead(25, 21)
-    dataMemory.io.dataWrite := registerFile.io.b  // input value from register b in memory at address a
-  } .elsewhen(controlUnit.io.branch && alu.io.comparisonResult) { //JEQ, JLT, JGT, JR
-    programCounter.io.programCounterJump := programMemory.io.instructionRead(15,0)
-    programCounter.io.jump := alu.io.comparisonResult
-  }
-  // End?
+  //Defining "Wires"
+  controlUnit.io.func := programMemory.io.instructionRead(5,0)
+  controlUnit.io.opcode := programMemory.io.instructionRead(31,26)
+  registerFile.io.aSel := programMemory.io.instructionRead(20,16)
+  registerFile.io.bSel := Mux(controlUnit.io.memWrite, programMemory.io.instructionRead(25,21),programMemory.io.instructionRead(15,11) )
+  registerFile.io.writeSel := programMemory.io.instructionRead(25,21)
+  registerFile.io.writeEnable := controlUnit.io.writeEnable
+  dataMemory.io.writeEnable := controlUnit.io.memWrite
+  alu.io.a := registerFile.io.a
+  alu.io.b := Mux(controlUnit.io.aluSrc, programMemory.io.instructionRead(15,0).pad(32), registerFile.io.b)
+  alu.io.sel := controlUnit.io.aluSel
+  dataMemory.io.address := alu.io.result(31,16)
+  dataMemory.io.dataWrite := registerFile.io.b
+  registerFile.io.writeData := Mux(controlUnit.io.memtoReg, dataMemory.io.dataRead, alu.io.result)
+  programCounter.io.programCounterJump := programMemory.io.instructionRead(15,0)
+  programCounter.io.jump := Mux(controlUnit.io.branch && alu.io.comparisonResult, true.B, false.B)
 
   ////////////////////////////////////////////
 

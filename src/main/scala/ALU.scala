@@ -1,7 +1,7 @@
 import chisel3._
 import chisel3.util._
 
-class Alu extends Module {
+class ALU extends Module {
   val io = IO(new Bundle {
     val sel = Input(UInt(4.W))
     val a = Input(UInt(32.W)) //operand 1

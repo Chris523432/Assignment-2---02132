@@ -4,7 +4,7 @@ import java.util
 import chisel3._
 import chisel3.iotesters.PeekPokeTester
 
-class AluTester(dut: Alu) extends PeekPokeTester(dut) {
+class AluTester(dut: ALU) extends PeekPokeTester(dut) {
   //ADD
   poke(dut.io.a, 3.U)
   poke(dut.io.b, 5.U)
@@ -73,6 +73,6 @@ object AluTester {
       Array("--generate-vcd-output", "on",
         "--target-dir", "generated",
         "--top-name", "Alu"),
-      () => new Alu())(alu => new AluTester(alu))
+      () => new ALU())(alu => new AluTester(alu))
   }
 }
