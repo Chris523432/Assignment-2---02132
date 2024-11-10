@@ -41,27 +41,27 @@ class CPUTop extends Module {
     registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
     registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
     alu.io.a := registerFile.io.a
-    when (controlUnit.io.aluSrc) { //ADDI SUBI, LI
+    when (controlUnit.io.aluSrc) { //ADDI SUBI, LI - MUX for ALU input b
       alu.io.b := programMemory.io.instructionRead(15, 0).pad(32)
     } .otherwise { //ADD, MULT
       controlUnit.io.func := programMemory.io.instructionRead(5, 0)
       registerFile.io.bSel := programMemory.io.instructionRead(15, 11)
       alu.io.b := registerFile.io.b
-    }
+    } // MUX end for ALU input b
     registerFile.io.writeData := alu.io.result //Write data from ALU into register
-  } .elsewhen(controlUnit.io.memtoReg) { //LD
+  } .elsewhen(controlUnit.io.memtoReg) { //LD - MUX'ish for ALU and MEM
     registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
     registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
     alu.io.a := registerFile.io.a
     dataMemory.io.address := alu.io.result(31,16)
     registerFile.io.writeData := dataMemory.io.dataRead
-  } .elsewhen(controlUnit.io.memWrite) { //SD
+  } .elsewhen(controlUnit.io.memWrite) { //SD - Take output a/result from ALU as address
     registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
     alu.io.a := registerFile.io.a
     dataMemory.io.address := alu.io.result(31,16)
     registerFile.io.bSel := programMemory.io.instructionRead(25, 21)
-    dataMemory.io.dataWrite := registerFile.io.b
-  } .elsewhen(controlUnit.io.branch && alu.io.comparisonResult) { //JEQ, JLT, JGT
+    dataMemory.io.dataWrite := registerFile.io.b  // input value from register b in memory at address a
+  } .elsewhen(controlUnit.io.branch && alu.io.comparisonResult) { //JEQ, JLT, JGT, JR
     programCounter.io.programCounterJump := programMemory.io.instructionRead(15,0)
     programCounter.io.jump := alu.io.comparisonResult
   }
