@@ -13,6 +13,7 @@ class ControlUnit extends Module {
     val aluSrc = Output(Bool()) // Mux for immediate or registervalue
     val memtoReg = Output(Bool()) // Mux for result from ALU or read Memory
     val branch = Output(Bool()) // For Jumping
+    val stop = Output(Bool())
   })
 
   io.aluSel := 0.U
@@ -22,6 +23,7 @@ class ControlUnit extends Module {
   io.aluSrc := false.B
   io.branch:= false.B
   io.memtoReg := false.B
+  io.stop := false.B
 
   switch(io.opcode) {
     is(0.U) {
@@ -80,6 +82,9 @@ class ControlUnit extends Module {
       io.aluSel := 11.U
       io.aluSrc := true.B
       io.branch := true.B
+    }
+    is(63.U) {
+      io.stop := true.B
     }
   }
 }

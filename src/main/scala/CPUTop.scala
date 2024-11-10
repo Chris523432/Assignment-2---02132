@@ -3,21 +3,20 @@ import chisel3.util._
 
 class CPUTop extends Module {
   val io = IO(new Bundle {
-    val done = Output(Bool ())
-    val run = Input(Bool ())
-    val stop = Input(Bool ())
+    val run = Input(Bool())
+    val done = Output(Bool())
     //This signals are used by the tester for loading and dumping the memory content, do not touch
-    val testerDataMemEnable = Input(Bool ())
-    val testerDataMemAddress = Input(UInt (16.W))
-    val testerDataMemDataRead = Output(UInt (32.W))
-    val testerDataMemWriteEnable = Input(Bool ())
-    val testerDataMemDataWrite = Input(UInt (32.W))
+    val testerDataMemEnable = Input(Bool())
+    val testerDataMemAddress = Input(UInt(16.W))
+    val testerDataMemDataRead = Output(UInt(32.W))
+    val testerDataMemWriteEnable = Input(Bool())
+    val testerDataMemDataWrite = Input(UInt(32.W))
     //This signals are used by the tester for loading and dumping the memory content, do not touch
-    val testerProgMemEnable = Input(Bool ())
-    val testerProgMemAddress = Input(UInt (16.W))
-    val testerProgMemDataRead = Output(UInt (32.W))
-    val testerProgMemWriteEnable = Input(Bool ())
-    val testerProgMemDataWrite = Input(UInt (32.W))
+    val testerProgMemEnable = Input(Bool())
+    val testerProgMemAddress = Input(UInt(16.W))
+    val testerProgMemDataRead = Output(UInt(32.W))
+    val testerProgMemWriteEnable = Input(Bool())
+    val testerProgMemDataWrite = Input(UInt(32.W))
   })
 
   //Creating components
@@ -29,27 +28,27 @@ class CPUTop extends Module {
   val alu = Module(new ALU())
 
   //Connecting the modules
-  io.done := false.B
   programCounter.io.run := io.run
-  programCounter.io.stop := io.stop
+  io.done := controlUnit.io.stop
+  programCounter.io.stop := controlUnit.io.stop
   programMemory.io.address := programCounter.io.programCounter
 
   ////////////////////////////////////////////
   //Defining "Wires"
-  controlUnit.io.func := programMemory.io.instructionRead(5,0)
-  controlUnit.io.opcode := programMemory.io.instructionRead(31,26)
-  registerFile.io.aSel := programMemory.io.instructionRead(20,16)
-  registerFile.io.bSel := Mux(controlUnit.io.memWrite, programMemory.io.instructionRead(25,21),programMemory.io.instructionRead(15,11) )
-  registerFile.io.writeSel := programMemory.io.instructionRead(25,21)
+  controlUnit.io.func := programMemory.io.instructionRead(5, 0)
+  controlUnit.io.opcode := programMemory.io.instructionRead(31, 26)
+  registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
+  registerFile.io.bSel := Mux(controlUnit.io.memWrite, programMemory.io.instructionRead(25, 21), programMemory.io.instructionRead(15, 11))
+  registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
   registerFile.io.writeEnable := controlUnit.io.writeEnable
   dataMemory.io.writeEnable := controlUnit.io.memWrite
   alu.io.a := registerFile.io.a
-  alu.io.b := Mux(controlUnit.io.aluSrc, programMemory.io.instructionRead(15,0).pad(32), registerFile.io.b)
+  alu.io.b := Mux(controlUnit.io.aluSrc, programMemory.io.instructionRead(15, 0).pad(32), registerFile.io.b)
   alu.io.sel := controlUnit.io.aluSel
-  dataMemory.io.address := alu.io.result(31,16)
+  dataMemory.io.address := alu.io.result(15, 0) //eeh what the spruce
   dataMemory.io.dataWrite := registerFile.io.b
   registerFile.io.writeData := Mux(controlUnit.io.memtoReg, dataMemory.io.dataRead, alu.io.result)
-  programCounter.io.programCounterJump := programMemory.io.instructionRead(15,0)
+  programCounter.io.programCounterJump := programMemory.io.instructionRead(15, 0)
   programCounter.io.jump := Mux(controlUnit.io.branch && alu.io.comparisonResult, true.B, false.B)
 
   ////////////////////////////////////////////
