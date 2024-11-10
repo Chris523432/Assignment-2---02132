@@ -34,28 +34,38 @@ class CPUTop extends Module {
 
   ////////////////////////////////////////////
   //Continue here with your connections
-  registerFile.io.writeEnable := controlUnit.io.writeEnable
-  val immediate = programMemory.io.instructionRead(15, 0)
-  programCounter.io.programCounterJump :=  immediate
-
-  val opcode = programMemory.io.instructionRead(31, 25)
+  val opcode = programMemory.io.instructionRead(31, 26)
   controlUnit.io.opcode := opcode
-  if (opcode != 9.U) {
-    registerFile.io.writeSel := programMemory.io.instructionRead(24, 20)
-    registerFile.io.aSel := programMemory.io.instructionRead(19, 15)
-    if (opcode == 0.U) {
-      registerFile.io.bSel := programMemory.io.instructionRead(14, 10)
+  // Everything based on signals from control unit
+  when (controlUnit.io.writeEnable && !controlUnit.io.memRead) { //ADD, MULT, ADDI, SUBI, LI
+    registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
+    registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
+    alu.io.a := registerFile.io.a
+    when (controlUnit.io.aluSrc) { //ADDI SUBI, LI
+      alu.io.b := programMemory.io.instructionRead(15, 0).pad(32)
+    } .otherwise { //ADD, MULT
       controlUnit.io.func := programMemory.io.instructionRead(5, 0)
+      registerFile.io.bSel := programMemory.io.instructionRead(15, 11)
+      alu.io.b := registerFile.io.b
     }
+    registerFile.io.writeData := alu.io.result //Write data from ALU into register
+  } .elsewhen(controlUnit.io.memtoReg) { //LD
+    registerFile.io.writeSel := programMemory.io.instructionRead(25, 21)
+    registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
+    alu.io.a := registerFile.io.a
+    dataMemory.io.address := alu.io.result(31,16)
+    registerFile.io.writeData := dataMemory.io.dataRead
+  } .elsewhen(controlUnit.io.memWrite) { //SD
+    registerFile.io.aSel := programMemory.io.instructionRead(20, 16)
+    alu.io.a := registerFile.io.a
+    dataMemory.io.address := alu.io.result(31,16)
+    registerFile.io.bSel := programMemory.io.instructionRead(25, 21)
+    dataMemory.io.dataWrite := registerFile.io.b
+  } .elsewhen(controlUnit.io.branch && alu.io.comparisonResult) { //JEQ, JLT, JGT
+    programCounter.io.programCounterJump := programMemory.io.instructionRead(15,0)
+    programCounter.io.jump := alu.io.comparisonResult
   }
-
-  when (controlUnit.io.aluSrc) {
-    alu.io.b := registerFile.io.b
-  } .otherwise {
-    alu.io.b := immediate >> 16
-  }
-
-  alu.io.sel := controlUnit.io.aluSel
+  // End?
 
   ////////////////////////////////////////////
 

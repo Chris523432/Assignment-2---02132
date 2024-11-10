@@ -14,6 +14,17 @@ class RegisterFileTester(dut: RegisterFile) extends PeekPokeTester(dut) {
   poke(dut.io.aSel, 1.U)
   step(1)
   expect(dut.io.a, 10.U)
+
+  poke(dut.io.aSel,0.U)
+  step(1)
+  expect(dut.io.a,0.U)
+
+  poke(dut.io.writeEnable, false)
+  poke(dut.io.writeSel,1.U)
+  poke(dut.io.writeData,15.U)
+  poke(dut.io.aSel, 1.U)
+  step(1)
+
 }
 
 object RegisterFileTester {

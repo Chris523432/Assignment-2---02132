@@ -6,12 +6,13 @@ class ControlUnit extends Module {
     val opcode = Input(UInt(6.W))
     val func = Input(UInt(6.W))
 
-    val aluSel = Output(UInt(4.W))
-    val writeEnable = Output(Bool())
-    val memRead = Output(Bool())
-    val memWrite = Output(Bool())
-    val aluSrc = Output(Bool())
-    val branch = Output(Bool())
+    val aluSel = Output(UInt(4.W)) // Choose which operation to be used.
+    val writeEnable = Output(Bool()) //RegWrite
+    val memRead = Output(Bool()) //Read from memory
+    val memWrite = Output(Bool()) // Write to memory
+    val aluSrc = Output(Bool()) // Mux for immediate or registervalue
+    val memtoReg = Output(Bool()) // Mux for result from ALU or read Memory
+    val branch = Output(Bool()) // For Jumping
   })
 
   io.aluSel := 0.U
@@ -20,6 +21,7 @@ class ControlUnit extends Module {
   io.memWrite := false.B
   io.aluSrc := false.B
   io.branch:= false.B
+  io.memtoReg := false.B
 
   switch(io.opcode) {
     is(0.U) {
@@ -53,6 +55,7 @@ class ControlUnit extends Module {
       io.aluSel := 6.U
       io.writeEnable := true.B
       io.memRead := true.B
+      io.memtoReg := true.B
     }
     is(5.U) { //SD
       io.aluSel := 7.U
