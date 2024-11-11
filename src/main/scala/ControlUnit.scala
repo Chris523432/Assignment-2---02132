@@ -65,22 +65,18 @@ class ControlUnit extends Module {
     }
     is(6.U) { //JEQ
       io.aluSel := 8.U
-      io.aluSrc := true.B
       io.branch := true.B
     }
     is(7.U) { //JLT
       io.aluSel := 9.U
-      io.aluSrc := true.B
       io.branch := true.B
     }
     is(8.U) { //JGT
       io.aluSel := 10.U
-      io.aluSrc := true.B
       io.branch := true.B
     }
     is(9.U) { //JR
       io.aluSel := 11.U
-      io.aluSrc := true.B
       io.branch := true.B
     }
     is(63.U) {
