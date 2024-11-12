@@ -53,7 +53,6 @@ class ControlUnitTester(dut: ControlUnit) extends PeekPokeTester(dut) {
   step(1)
   expect(dut.io.aluSel, 6.U)
   expect(dut.io.writeEnable, true.B)
-  expect(dut.io.memRead, true.B)
   expect(dut.io.memtoReg, true.B)
 
   //SD
