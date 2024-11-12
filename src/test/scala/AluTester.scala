@@ -33,7 +33,19 @@ class AluTester(dut: ALU) extends PeekPokeTester(dut) {
   step(1)
   expect(dut.io.result, 2.U)
 
-  //LI, LD, SD are the same so they should all act the same
+  //LI
+  poke(dut.io.b, 5.U)
+  poke(dut.io.sel, 5.U)
+  step(1)
+  expect(dut.io.result, 5.U)
+
+  //LD
+  poke(dut.io.a, 5.U)
+  poke(dut.io.sel, 5.U)
+  step(1)
+  expect(dut.io.result, 5.U)
+
+  //SD
   poke(dut.io.a, 5.U)
   poke(dut.io.sel, 5.U)
   step(1)
