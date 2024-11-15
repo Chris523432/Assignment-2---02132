@@ -45,11 +45,11 @@ class CPUTop extends Module {
   alu.io.a := registerFile.io.a
   alu.io.b := Mux(controlUnit.io.aluSrc, programMemory.io.instructionRead(15, 0).pad(32), registerFile.io.b)
   alu.io.sel := controlUnit.io.aluSel
-  dataMemory.io.address := alu.io.result(15, 0) //eeh what the spruce
+  dataMemory.io.address := alu.io.result(15, 0)
   dataMemory.io.dataWrite := registerFile.io.b
   registerFile.io.writeData := Mux(controlUnit.io.memtoReg, dataMemory.io.dataRead, alu.io.result)
   programCounter.io.programCounterJump := programMemory.io.instructionRead(15, 0)
-  programCounter.io.jump := Mux(controlUnit.io.branch && alu.io.comparisonResult, true.B, false.B)
+  programCounter.io.jump := controlUnit.io.branch & alu.io.comparisonResult
 
   ////////////////////////////////////////////
 

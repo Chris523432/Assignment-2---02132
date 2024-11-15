@@ -1,1 +1,1 @@
-["AluTester","CPUTopTester","HelloTester","ProgramCounterTester","RegisterFileTester"]
+["AluTester","CPUTopTester","ControlUnitTester","HelloTester","ProgramCounterTester","RegisterFileTester"]
